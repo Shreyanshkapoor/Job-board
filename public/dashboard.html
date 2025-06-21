@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard | CareerConnect</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 🌙 Dark Mode Toggle -->
+  <header>
+    <label class="switch">
+      <input type="checkbox" id="darkToggle" />
+      <span class="slider"></span>
+    </label>
+
+    <div class="container header-flex">
+      <h1>Welcome, <span id="currentUser"></span> 👋</h1>
+      <div class="header-actions">
+        <input type="text" id="searchInput" placeholder="Search jobs..." />
+        <select id="jobFilter">
+          <option value="all">All</option>
+          <option value="full-time">Full-time</option>
+          <option value="part-time">Part-time</option>
+          <option value="remote">Remote</option>
+        </select>
+        <button id="postJobBtn">Post Job</button>
+        <button id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="loader" id="loader"></div>
+    <div id="jobList"></div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 CareerConnect. All rights reserved.</p>
+  </footer>
+
+  <!-- ➕ Post Job Modal -->
+  <div class="modal" id="jobModal">
+    <div class="modal-content">
+      <h2>Post a New Job</h2>
+      <form id="postJobForm">
+        <input type="text" id="jobTitle" placeholder="Job Title" required />
+        <input type="text" id="company" placeholder="Company Name" required />
+        <input type="text" id="location" placeholder="Location" required />
+        <input type="text" id="logoUrl" placeholder="Logo URL (optional)" />
+        <select id="jobType">
+          <option value="full-time">Full-time</option>
+          <option value="part-time">Part-time</option>
+          <option value="remote">Remote</option>
+        </select>
+        <button type="submit">Add Job</button>
+        <button type="button" id="closeModal">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- JavaScript Logic -->
+  <script>
+    // ✅ Auth Check
+    const isAuth = localStorage.getItem("authenticated");
+    const user = localStorage.getItem("currentUser");
+    if (!isAuth || !user) window.location.href = "index.html";
+    document.getElementById("currentUser").textContent = user;
+
+    // 🌐 Job Data
+    let jobs = [
+      {
+        title: "Frontend Developer",
+        company: "TechCorp",
+        type: "full-time",
+        location: "New York, NY",
+        logo: "https://via.placeholder.com/50"
+      },
+      {
+        title: "Backend Developer",
+        company: "Innovate Inc.",
+        type: "part-time",
+        location: "Remote",
+        logo: "https://via.placeholder.com/50"
+      },
+      {
+        title: "UI/UX Designer",
+        company: "Designify",
+        type: "remote",
+        location: "Remote",
+        logo: "https://via.placeholder.com/50"
+      }
+    ];
+
+    const jobList = document.getElementById("jobList");
+    const filter = document.getElementById("jobFilter");
+    const searchInput = document.getElementById("searchInput");
+
+    // 🔍 Render Jobs
+    function renderJobs(type = "all", keyword = "") {
+      document.getElementById("loader").style.display = "block";
+      setTimeout(() => {
+        document.getElementById("loader").style.display = "none";
+        jobList.innerHTML = "";
+        const filtered = jobs.filter(
+          job =>
+            (type === "all" || job.type === type) &&
+            (job.title.toLowerCase().includes(keyword.toLowerCase()) ||
+             job.company.toLowerCase().includes(keyword.toLowerCase()))
+        );
+
+        if (filtered.length === 0) {
+          jobList.innerHTML = "<p>No jobs found.</p>";
+          return;
+        }
+
+        filtered.forEach(job => {
+          const card = document.createElement("div");
+          card.className = "job-card";
+          card.innerHTML = `
+            <div class="card-header">
+              <img src="${job.logo || 'https://via.placeholder.com/50'}" alt="logo" class="job-logo" />
+              <div>
+                <h2>${job.title}</h2>
+                <p><strong>${job.company}</strong> - ${job.location}</p>
+              </div>
+            </div>
+            <span class="job-type">${job.type}</span>
+            <button class="apply-btn">Apply Now</button>
+          `;
+          jobList.appendChild(card);
+        });
+      }, 500); // Simulated loading delay
+    }
+
+    // 🔄 Filter & Search Events
+    filter.addEventListener("change", () => renderJobs(filter.value, searchInput.value));
+    searchInput.addEventListener("input", () => renderJobs(filter.value, searchInput.value));
+    window.onload = () => renderJobs();
+
+    // ➕ Modal Logic
+    const modal = document.getElementById("jobModal");
+    document.getElementById("postJobBtn").onclick = () => modal.style.display = "flex";
+    document.getElementById("closeModal").onclick = () => modal.style.display = "none";
+
+    document.getElementById("postJobForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const title = document.getElementById("jobTitle").value;
+      const company = document.getElementById("company").value;
+      const location = document.getElementById("location").value;
+      const type = document.getElementById("jobType").value;
+      const logo = document.getElementById("logoUrl").value;
+
+      jobs.push({ title, company, location, type, logo });
+      modal.style.display = "none";
+      renderJobs(filter.value, searchInput.value);
+      this.reset();
+    });
+
+    // 🚪 Logout
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("authenticated");
+      localStorage.removeItem("currentUser");
+      window.location.href = "index.html";
+    });
+
+    // 🌙 Dark Mode
+    const toggle = document.getElementById("darkToggle");
+    if (localStorage.getItem("dark") === "true") {
+      document.body.classList.add("dark");
+      toggle.checked = true;
+    }
+    toggle?.addEventListener("change", () => {
+      document.body.classList.toggle("dark");
+      localStorage.setItem("dark", toggle.checked);
+    });
+  </script>
+</body>
+</html>

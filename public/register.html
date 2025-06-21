@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register | CareerConnect</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="login-container">
+    <h2>Create Your Account</h2>
+    <form id="registerForm">
+      <input type="text" id="regUsername" placeholder="Choose Username" required />
+      <input type="password" id="regPassword" placeholder="Choose Password" required />
+      <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+      <button type="submit">Register</button>
+      <p id="regMessage" class="error"></p>
+      <p>Already have an account? <a href="index.html">Login here</a></p>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById("registerForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const username = document.getElementById("regUsername").value.trim();
+      const password = document.getElementById("regPassword").value.trim();
+      const confirmPassword = document.getElementById("confirmPassword").value.trim();
+      const regMessage = document.getElementById("regMessage");
+
+      if (password !== confirmPassword) {
+        regMessage.textContent = "Passwords do not match.";
+        regMessage.style.color = "red";
+        return;
+      }
+
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+
+      if (users.find(user => user.username === username)) {
+        regMessage.textContent = "Username already exists.";
+        regMessage.style.color = "red";
+        return;
+      }
+
+      users.push({ username, password });
+      localStorage.setItem("users", JSON.stringify(users));
+      regMessage.textContent = "Registration successful! Redirecting to login...";
+      regMessage.style.color = "green";
+
+      setTimeout(() => window.location.href = "index.html", 2000);
+    });
+  </script>
+</body>
+</html>

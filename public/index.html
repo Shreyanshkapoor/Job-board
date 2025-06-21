@@ -8,26 +8,38 @@
 </head>
 <body>
   <div class="login-container">
-    <h2>CareerConnect Login</h2>
+    <h1>CareerConnect</h1>
+    <h2>Login</h2>
     <form id="loginForm">
       <input type="text" id="username" placeholder="Enter Username" required />
       <input type="password" id="password" placeholder="Enter Password" required />
       <button type="submit">Login</button>
       <p id="loginError" class="error"></p>
+      <p>Don't have an account? <a href="register.html">Register here</a></p>
     </form>
   </div>
 
   <script>
     document.getElementById("loginForm").addEventListener("submit", function (e) {
       e.preventDefault();
+
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
+      const errorMsg = document.getElementById("loginError");
 
-      if (username === "admin" && password === "1234") {
+      const users = JSON.parse(localStorage.getItem("users")) || [];
+
+      const match = users.find(
+        user => user.username === username && user.password === password
+      );
+
+      if (match) {
         localStorage.setItem("authenticated", "true");
+        localStorage.setItem("currentUser", username);
         window.location.href = "dashboard.html";
       } else {
-        document.getElementById("loginError").textContent = "Invalid username or password";
+        errorMsg.textContent = "Invalid username or password.";
+        errorMsg.style.color = "red";
       }
     });
   </script>
